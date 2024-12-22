@@ -34,8 +34,31 @@ for block in quotes_text:
         print(block)
 
 # : /quotes/count
-print(len(quotes_text))
+# print(len(quotes_text))
+#
+# print(quotes_text[-1]['id'] + 1)
 
+
+def exist_post_id(post_id):
+    not_found = True
+    quotes_block_id = -1
+    for block in quotes_text:
+        quotes_block_id += 1
+        if block['id'] == post_id:
+            not_found = False
+            return quotes_block_id
+    if not_found:
+        return False
+
+print(exist_post_id(5))
+
+
+
+
+# {
+#     "author": "Tom",
+#     "text": "Tom qoute"
+# }
 
 
 
