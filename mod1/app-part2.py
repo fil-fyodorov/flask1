@@ -43,15 +43,12 @@ def get_new_quote_id():
 
 
 def exist_post_id(post_id):
-    not_found = True
     quotes_block_id = -1
     for block in quotes_text:
         quotes_block_id += 1
         if block['id'] == post_id:
-            not_found = False
             return quotes_block_id
-    if not_found:
-        return False
+    return False
 
 
 def quotes_count():
@@ -83,13 +80,10 @@ def quotes_count():
 
 @app.route("/quotes/<int:post_id>")
 def show_post(post_id):
-    not_found = True
     for block in quotes_text:
         if block['id'] == post_id:
-            not_found = False
             return block
-    if not_found:
-        return f"Quote with id={post_id} not found", 404
+    return f"Quote with id={post_id} not found", 404
 
 
 @app.route("/")  # Первый URL для обработки
@@ -107,7 +101,7 @@ def hello_world():  # Функция обработчик для этоо URL
 
 @app.route("/quotes", methods=['POST'])
 def create_quote():
-    global quotes_text
+    # global quotes_text
     error = None
     if request.method == 'POST':
         data = request.json
@@ -122,12 +116,12 @@ def create_quote():
 
 
 
-@app.route("/quotes/<id>", methods=['PUT'])
+@app.route("/quotes/<int:id>", methods=['PUT'])
 def edit_quote(id):
-   global quotes_text
+   # global quotes_text
    if request.method == 'PUT':
        new_data = request.json
-       quotes_block_id = exist_post_id(int(id))
+       quotes_block_id = exist_post_id(id)
        if quotes_block_id:
            if 'author' in new_data:
                quotes_text[quotes_block_id]['author'] = new_data['author']
@@ -138,12 +132,12 @@ def edit_quote(id):
        return quotes_text[quotes_block_id], 201
 
 
-@app.route("/quotes/<id>", methods=['DELETE'])
+@app.route("/quotes/<int:id>", methods=['DELETE'])
 def delete(id):
-   global quotes_text
+   # global quotes_text
    # delete quote with id
    if request.method == 'DELETE':
-       quotes_block_id = exist_post_id(int(id))
+       quotes_block_id = exist_post_id(id)
        if quotes_block_id:
            quotes_text.pop(quotes_block_id)
        else:
