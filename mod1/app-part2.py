@@ -163,6 +163,9 @@ def edit_quote(id):
                quotes_text[quotes_block_id]['author'] = new_data['author']
            if 'text' in new_data:
                quotes_text[quotes_block_id]['text'] = new_data['text']
+           if 'rating' in new_data:
+                if 0 < new_data['rating'] < 10:
+                    quotes_text[quotes_block_id]['rating'] = new_data['rating']
        else:
            abort(404)
        return quotes_text[quotes_block_id], 201
