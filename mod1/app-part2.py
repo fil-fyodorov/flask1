@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import request
 from random import choice
-from flask import abort
+from flask import abort, jsonify
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -14,27 +14,36 @@ about_me = {
 
 
 quotes_text = [
-   {
+    {
        "id": 3,
-       "author": "Rick Cook",
+       "rating": 4,
+       "author": "Rick_Cook",
        "text": "Программирование сегодня — это гонка разработчиков программ, стремящихся писать программы с большей и лучшей идиотоустойчивостью, и вселенной, которая пытается создать больше отборных идиотов. Пока вселенная побеждает."
-   },
-   {
+    },
+    {
        "id": 5,
+       "rating": 6,
        "author": "Waldi Ravens",
        "text": "Программирование на С похоже на быстрые танцы на только что отполированном полу людей с острыми бритвами в руках."
-   },
-   {
-       "id": 6,
-       "author": "Mosher’s Law of Software Engineering",
-       "text": "Не волнуйтесь, если что-то не работает. Если бы всё работало, вас бы уволили."
-   },
-   {
+    },
+    {
+        "author": "Rick_Cook",
+        "id": 3,
+        "rating": 4,
+        "text": "Программирование сегодня — это гонка разработчиков программ, стремящихся писать программы с большей и лучшей идиотоустойчивостью, и вселенной, которая пытается создать больше отборных идиотов. Пока вселенная побеждает."
+    },
+    {
+        "id": 6,
+        "rating": 7,
+        "author": "Mosher’s Law of Software Engineering",
+        "text": "Не волнуйтесь, если что-то не работает. Если бы всё работало, вас бы уволили."
+    },
+    {
        "id": 8,
+       "rating": 9,
        "author": "Yoggi Berra",
        "text": "В теории, теория и практика неразделимы. На практике это не так."
-   },
-
+    }
 ]
 
 
@@ -58,7 +67,7 @@ def quotes_count():
 
 @app.route("/about")
 def about():
-   return about_me
+   return jsonify(about_me), 200
 
 
 @app.route("/quotes")
@@ -82,13 +91,13 @@ def quotes_count():
 def show_post(post_id):
     for block in quotes_text:
         if block['id'] == post_id:
-            return block
+            return block, 200
     return f"Quote with id={post_id} not found", 404
 
 
 @app.route("/")  # Первый URL для обработки
 def hello_world():  # Функция обработчик для этоо URL
-   return "Hello, World!"
+   return jsonify(data="Hello, World!"), 200
 
 
 
@@ -99,14 +108,41 @@ def hello_world():  # Функция обработчик для этоо URL
 #    return {}, 201
 
 
+@app.route('/quotes/filter', methods=['GET'])
+def search():
+    args = request.args
+    author_value = args.get('author', default=None, type=str)
+    rating_value = args.get('rating', default=None, type=int)
+    result = []
+    if None not in (author_value, rating_value):
+        for block in quotes_text:
+            if block['author'] == author_value and block['rating'] == rating_value:
+                result.append(block)
+    elif author_value is not None:
+        for block in quotes_text:
+            if block['author'] == author_value:
+                result.append(block)
+    elif rating_value is not None:
+        for block in quotes_text:
+            if  block['rating'] == rating_value:
+                result.append(block)
+    return result
+
+
+
 @app.route("/quotes", methods=['POST'])
 def create_quote():
-    # global quotes_text
     error = None
     if request.method == 'POST':
         data = request.json
+        quote_rating = 1
+        if 'rating' in data:
+            quote_rating=data['rating']
+            if quote_rating < 1 or quote_rating > 10:
+                quote_rating = 1
         new_quote = {
             "id": get_new_quote_id(),
+            "rating": quote_rating,
             "author": data['author'],
             "text":  data['text']
             }
@@ -143,8 +179,6 @@ def delete(id):
        else:
            abort(404)
        return f"Quote with id {id} is deleted.", 200
-
-
 
 
 
